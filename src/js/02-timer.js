@@ -1,21 +1,19 @@
 import flatpickr from "flatpickr";
 import 'flatpickr/dist/flatpickr.min.css';
-import { Notify } from 'notiflix/build/notiflix-notify-aio';
+import { Notify } from "notiflix";
 
 const inputEl = document.querySelector('#datetime-picker');
-const buttonEl = document.querySelector('button[data-start]');
+const btnEl = document.querySelector('button[data-start]');
 const timerDiv = document.querySelector('.timer');
 const daysEl = document.querySelector('span[data-days]');
 const hoursEl = document.querySelector('span[data-hours]');
-const minutesEl = document.querySelector('span[data-minutes]');
-const secondsEl = document.querySelector('span[data-seconds]');
-// console.dir(buttonEl)
-buttonEl.classList.add('disabled');
+const minEl = document.querySelector('span[data-minutes]');
+const secEl = document.querySelector('span[data-seconds]');
+
+btnEl.classList.add('disabled');
 let userDate = null;
 
-function pad(value) {
-    return String(value).padStart(2, '0');
-}
+
 
 function convertMs(ms) {
     // Number of milliseconds per unit of time
@@ -40,6 +38,9 @@ function convertMs(ms) {
 //   console.log(convertMs(140000)); // {days: 0, hours: 0, minutes: 2, seconds: 20}
 //   console.log(convertMs(24140000)); // {days: 0, hours: 6 minutes: 42, seconds: 20}
 
+function pad(value) {
+    return String(value).padStart(2, '0');
+}
 
 const options = {
     enableTime: true,
@@ -47,22 +48,26 @@ const options = {
     defaultDate: new Date(),
     minuteIncrement: 1,
     onClose(selectedDates) {
+        console.log(selectedDates[0]);
+
         if(selectedDates[0] < Date.now()) {
             Notify.failure('Please choose a date in the future');
             userDate = new Date();
         } else { 
-            buttonEl.disabled = false;
-            buttonEl.classList.remove('disabled');
+            btnEl.disabled = false;
+            btnEl.classList.remove('disabled');
             userDate = selectedDates[0];
         }
     },
 };
 
+
+
 class Timer  {
     constructor() {
         this.isActive = false;
         this.timerId = null;
-        buttonEl.disabled = true;
+        btnEl.disabled = true;
     }
     timerStart() {
         if (this.isActive) {
@@ -74,12 +79,12 @@ class Timer  {
         const deltaTime = userDate - currentTime;
         const components = convertMs(deltaTime);
 
-                secondsEl.textContent = components.seconds;
-                minutesEl.textContent = components.minutes;
+                secEl.textContent = components.seconds;
+                minEl.textContent = components.minutes;
                 hoursEl.textContent = components.hours;
                 daysEl.textContent = components.days;
                 if (deltaTime <= 0) {
-                    this.timerStop();
+                    this.stop();
                     timerDiv.innerHTML = "Time is over!";
                 } 
     }, 1000)
@@ -92,4 +97,4 @@ class Timer  {
 
     const timer = new Timer();
     flatpickr(inputEl, options);
-    buttonEl.addEventListener('click', () => timer.timerStart());
+    btnEl.addEventListener('click', () => timer.timerStart());
